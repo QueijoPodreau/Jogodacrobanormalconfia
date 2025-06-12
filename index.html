@@ -19,6 +19,7 @@
         .canvas {
             background-image: url(https://i.redd.it/hmskj0de53ne1.gif);
             background-size: 100%;
+            
             display: block;
             margin: 0 auto;
             border: 5px solid rgb(255, 255, 255);
@@ -65,7 +66,7 @@
     const totalBlocos = tela.width / tamanhoBloco;
     
     const muska = new Audio('snd/calabreso.mp3');
-    muska.volume = 0.1;
+    muska.volume = 0.4;
     muska.loop = true;
 
     function carregarMusicas() {
@@ -90,12 +91,22 @@
         if (evento.key === "s" && direcao !== "cima") direcao = "baixo";
         if (evento.key === "a" && direcao !== "direita") direcao = "esquerda";
         if (evento.key === "d" && direcao !== "esquerda") direcao = "direita";
-    });
-
+        if (evento.key === "W" && direcao !== "baixo") direcao = "cima";
+        if (evento.key === "S" && direcao !== "cima") direcao = "baixo";
+        if (evento.key === "A" && direcao !== "direita") direcao = "esquerda";
+        if (evento.key === "D" && direcao !== "esquerda") direcao = "direita";
+        if (evento.key === "ArrowUp" && direcao !== "baixo") direcao = "cima";
+        if (evento.key === "ArrowDown" && direcao !== "cima") direcao = "baixo";
+        if (evento.key === "ArrowLeft" && direcao !== "direita") direcao = "esquerda";
+        if (evento.key === "ArrowRight" && direcao !== "esquerda") direcao = "direita";
+        if (evento.key === "1") cobrinha.push({}), pontuacao++, atualizarPontuacao();
+        if (evento.key === "2") croba.src = 'src/davi.png';
+        });
+    const croba = new Image();
+    croba.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFKdIQ_is-vkvl8UPbvRolFirNeggIIjJ-9A&s'
     function desenharCobrinha() {
         for (let parte of cobrinha) {
-            contexto.fillStyle = "lime";
-            contexto.fillRect(parte.x * tamanhoBloco, parte.y * tamanhoBloco, tamanhoBloco, tamanhoBloco);
+        contexto.drawImage(croba,parte.x * tamanhoBloco,parte.y * tamanhoBloco,tamanhoBloco,tamanhoBloco);
         }
     }
 
@@ -113,6 +124,7 @@
 
     let intervaloJogo;
     let comida = gerarComida();
+    let comida2
     let pontuacao = 0;
 
     function iniciarJogo() {
