@@ -58,23 +58,39 @@
 </body>
 
 <script>
-    const muska = new Audio('src/calabreso.mp3');
-    muska.loop = true;
-    muska.play();
     document.getElementById("dificuldade").style.color = "white";
     const tela = document.getElementById("tela");
     const contexto = tela.getContext("2d");
     const tamanhoBloco = 20;
     const totalBlocos = tela.width / tamanhoBloco;
+    
+    const muska = new Audio('snd/calabreso.mp3');
+    muska.volume = 0.1;
+    muska.loop = true;
+
+    function carregarMusicas() {
+        muska.currentTime = 0;
+        muska.play();
+    }
+
+    function pararMusica() {
+        muska.pause();
+        muska.currentTime = 0;
+    }
 
     function desenharCenario() {
         contexto.clearRect(0, 0, tela.width, tela.height);
-        contexto.fillStyle = "rgba(0, 0, 0, 0)";
-        contexto.fillRect(0, 0, tela.width, tela.height);
     }
 
-    //desenharCenario();
     let cobrinha = [{ x: 5, y: 5 }];
+    let direcao = "direita";
+
+    document.addEventListener("keydown", function (evento) {
+        if (evento.key === "w" && direcao !== "baixo") direcao = "cima";
+        if (evento.key === "s" && direcao !== "cima") direcao = "baixo";
+        if (evento.key === "a" && direcao !== "direita") direcao = "esquerda";
+        if (evento.key === "d" && direcao !== "esquerda") direcao = "direita";
+    });
 
     function desenharCobrinha() {
         for (let parte of cobrinha) {
@@ -82,16 +98,6 @@
             contexto.fillRect(parte.x * tamanhoBloco, parte.y * tamanhoBloco, tamanhoBloco, tamanhoBloco);
         }
     }
-
-    //desenharCobrinha();
-
-    let direcao = "direita";
-    document.addEventListener("keydown", function (evento) {
-        if (evento.key === "w" && direcao !== "baixo") direcao = "cima";
-        if (evento.key === "s" && direcao !== "cima") direcao = "baixo";
-        if (evento.key === "a" && direcao !== "direita") direcao = "esquerda";
-        if (evento.key === "d" && direcao !== "esquerda") direcao = "direita";
-    });
 
     function moverCobrinha() {
         let cabeca = { ...cobrinha[0] };
@@ -106,12 +112,16 @@
     }
 
     let intervaloJogo;
+    let comida = gerarComida();
+    let pontuacao = 0;
 
     function iniciarJogo() {
+        pararMusica(); // Parar a música atual antes de reiniciar tudo
         cobrinha = [{ x: 5, y: 5 }];
         direcao = "direita";
         pontuacao = 0;
         atualizarPontuacao();
+        carregarMusicas();
 
         let dificuldade = document.getElementById("dificuldade").value;
         let velocidade;
@@ -120,7 +130,7 @@
             case "facil": velocidade = 200; break;
             case "medio": velocidade = 120; break;
             case "dificil": velocidade = 70; break;
-            case "calabreso": velocidade = 15; break;
+            case "calabreso": velocidade = 30; break;
         }
 
         clearInterval(intervaloJogo);
@@ -130,13 +140,9 @@
             desenharCobrinha();
             desenharComida();
             verificarComida();
-            verificarColisoes()
-
+            verificarColisoes();
         }, velocidade);
     }
-
-    let comida = gerarComida();
-    let pontuacao = 0;
 
     function gerarComida() {
         return {
@@ -166,7 +172,6 @@
     function verificarColisoes() {
         let cabeca = cobrinha[0];
 
-        // Paredes
         if (
             cabeca.x < 0 || cabeca.x >= totalBlocos ||
             cabeca.y < 0 || cabeca.y >= totalBlocos
@@ -174,7 +179,6 @@
             gameOver();
         }
 
-        // Corpo
         for (let i = 1; i < cobrinha.length; i++) {
             if (cabeca.x === cobrinha[i].x && cabeca.y === cobrinha[i].y) {
                 gameOver();
@@ -184,8 +188,7 @@
 
     function gameOver() {
         clearInterval(intervaloJogo);
+        pararMusica();
         alert("Game over seu calabreso! Suas calabresas: " + pontuacao);
     }
 </script>
-
-</html>
