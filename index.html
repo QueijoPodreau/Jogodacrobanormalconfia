@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cobra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: -1px;
+            background-color: black;
+            -webkit-text-fill-color: white;
+        }
+
+        .canvas {
+            background-image: url(https://i.redd.it/hmskj0de53ne1.gif);
+            background-size: 100%;
+            display: block;
+            margin: 0 auto;
+            border: 5px solid rgb(255, 255, 255);
+        }
+
+        #painel-controle {
+            text-align: center;
+            margin-top: 25px;
+            margin-bottom: 50px;
+            
+        }
+        .dificuldade {
+            color: white;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Jogo da Calabresa</h1>
+    <h1></h1>
+
+    <canvas class="canvas" id="tela" height="400" width="400">Navegador não suporta o Canvas e HTML5</canvas>
+
+    <div id="painel-controle">
+        <label for="dificuldade">Dificuldade: </label>
+        <select id="dificuldade">
+            <option value="facil">Fácil</option>
+            <option value="medio" selected>Médio</option>
+            <option value="dificil">Difícil</option>
+            <option value="calabreso">Calabreso 😜</option>
+        </select>
+        <button onclick="iniciarJogo()">Iniciar Jogo</button>
+        <p>Calabresas: <span id="pontuacao">0</span></p>
+    </div>
+    
+</body>
+
+<script>
+    document.getElementById("dificuldade").style.color = "white";
+    const tela = document.getElementById("tela");
+    const contexto = tela.getContext("2d");
+    const tamanhoBloco = 20;
+    const totalBlocos = tela.width / tamanhoBloco;
+    const muska = new Audio('src/calabreso.mp3');
+    muska.loop = true;
+    muska.play();
+
+    function desenharCenario() {
+        contexto.clearRect(0, 0, tela.width, tela.height);
+        contexto.fillStyle = "rgba(0, 0, 0, 0)";
+        contexto.fillRect(0, 0, tela.width, tela.height);
+    }
+
+    //desenharCenario();
+    let cobrinha = [{ x: 5, y: 5 }];
+
+    function desenharCobrinha() {
+        for (let parte of cobrinha) {
+            contexto.fillStyle = "lime";
+            contexto.fillRect(parte.x * tamanhoBloco, parte.y * tamanhoBloco, tamanhoBloco, tamanhoBloco);
+        }
+    }
+
+    //desenharCobrinha();
+
+    let direcao = "direita";
+    document.addEventListener("keydown", function (evento) {
+        if (evento.key === "w" && direcao !== "baixo") direcao = "cima";
+        if (evento.key === "s" && direcao !== "cima") direcao = "baixo";
+        if (evento.key === "a" && direcao !== "direita") direcao = "esquerda";
+        if (evento.key === "d" && direcao !== "esquerda") direcao = "direita";
+    });
+
+    function moverCobrinha() {
+        let cabeca = { ...cobrinha[0] };
+
+        if (direcao === "direita") cabeca.x++;
+        if (direcao === "esquerda") cabeca.x--;
+        if (direcao === "cima") cabeca.y--;
+        if (direcao === "baixo") cabeca.y++;
+
+        cobrinha.unshift(cabeca);
+        cobrinha.pop();
+    }
+
+    let intervaloJogo;
+
+    function iniciarJogo() {
+        cobrinha = [{ x: 5, y: 5 }];
+        direcao = "direita";
+        pontuacao = 0;
+        atualizarPontuacao();
+
+        let dificuldade = document.getElementById("dificuldade").value;
+        let velocidade;
+
+        switch (dificuldade) {
+            case "facil": velocidade = 200; break;
+            case "medio": velocidade = 120; break;
+            case "dificil": velocidade = 70; break;
+            case "calabreso": velocidade = 15; break;
+        }
+
+        clearInterval(intervaloJogo);
+        intervaloJogo = setInterval(() => {
+            desenharCenario();
+            moverCobrinha();
+            desenharCobrinha();
+            desenharComida();
+            verificarComida();
+            verificarColisoes()
+
+        }, velocidade);
+    }
+
+    let comida = gerarComida();
+    let pontuacao = 0;
+
+    function gerarComida() {
+        return {
+            x: Math.floor(Math.random() * totalBlocos),
+            y: Math.floor(Math.random() * totalBlocos)
+        };
+    }
+
+    function desenharComida() {
+        contexto.fillStyle = "red";
+        contexto.fillRect(comida.x * tamanhoBloco, comida.y * tamanhoBloco, tamanhoBloco, tamanhoBloco);
+    }
+
+    function verificarComida() {
+        if (cobrinha[0].x === comida.x && cobrinha[0].y === comida.y) {
+            comida = gerarComida();
+            cobrinha.push({}); // Cresce
+            pontuacao++;
+            atualizarPontuacao();
+        }
+    }
+
+    function atualizarPontuacao() {
+        document.getElementById("pontuacao").innerText = pontuacao;
+    }
+
+    function verificarColisoes() {
+        let cabeca = cobrinha[0];
+
+        // Paredes
+        if (
+            cabeca.x < 0 || cabeca.x >= totalBlocos ||
+            cabeca.y < 0 || cabeca.y >= totalBlocos
+        ) {
+            gameOver();
+        }
+
+        // Corpo
+        for (let i = 1; i < cobrinha.length; i++) {
+            if (cabeca.x === cobrinha[i].x && cabeca.y === cobrinha[i].y) {
+                gameOver();
+            }
+        }
+    }
+
+    function gameOver() {
+        clearInterval(intervaloJogo);
+        alert("Game over seu calabreso! Suas calabresas: " + pontuacao);
+    }
+</script>
+
+</html>
