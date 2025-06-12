@@ -58,14 +58,14 @@
 </body>
 
 <script>
+    const muska = new Audio('src/calabreso.mp3');
+    muska.loop = true;
+    muska.play();
     document.getElementById("dificuldade").style.color = "white";
     const tela = document.getElementById("tela");
     const contexto = tela.getContext("2d");
     const tamanhoBloco = 20;
     const totalBlocos = tela.width / tamanhoBloco;
-    const muska = new Audio('src/calabreso.mp3');
-    muska.loop = true;
-    muska.play();
 
     function desenharCenario() {
         contexto.clearRect(0, 0, tela.width, tela.height);
